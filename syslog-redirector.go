@@ -1,22 +1,31 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
 	"log/syslog"
-"os"
-"os/exec"
+	"os"
+	"os/exec"
 )
 
 type Syslogger struct {
 	logger *log.Logger
 	stream string
+	buffer *bytes.Buffer
 }
 
 func (s *Syslogger) Write(p []byte) (n int, err error) {
-	x := string(p)
-	s.logger.Println(x)
+	for b := range p {
+		s.buffer.WriteByte(p[b])
+		if p[b] == 10 { // newline
+			msg := string(s.buffer.Bytes())
+			s.logger.Print(msg)
+			s.buffer = bytes.NewBuffer([]byte{})
+		}
+
+	}
 	return len(p), nil
 }
 
@@ -41,13 +50,13 @@ func NewSysLogger(stream, hostPort, prefix string) (*Syslogger, error) {
 	}
 
 	logger := log.New(s, "", logFlags)
-	return &Syslogger{logger, stream}, nil
+	return &Syslogger{logger, stream, bytes.NewBuffer([]byte{})}, nil
 }
 
 func main() {
 	//args are: syslog_host:port name command to run
 	//example ./syslog-redirector 10.0.3.1:6514 test-ls-thingy \
-        //            /bin/bash -c 'while true; do date; echo $SHELL; sleep 1; done'
+	//            /bin/bash -c 'while true; do date; echo $SHELL; sleep 1; done'
 
 	hostPort := os.Args[1]
 	name := os.Args[2]
@@ -55,23 +64,13 @@ func main() {
 	cmdArgs := os.Args[4:]
 	cmd := exec.Command(os.Args[3], cmdArgs...)
 	var err error
-	cmd.Stdout, err = NewSysLogger("stdout",  hostPort, name)
+	cmd.Stdout, err = NewSysLogger("stdout", hostPort, name)
 	if err != nil {
 		fmt.Errorf("error creating syslog writer: " + err.Error())
 	}
-	cmd.Stderr, err = NewSysLogger("stderr",  hostPort, name)
+	cmd.Stderr, err = NewSysLogger("stderr", hostPort, name)
 	err = cmd.Run()
 	if err != nil {
 		fmt.Errorf("error running command: " + err.Error())
 	}
 }
-
-
-
-
-
-
-
-
-
-
