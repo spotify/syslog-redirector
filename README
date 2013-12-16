@@ -1,0 +1,68 @@
+                               SPOTIFY PROJECT
+                              -----------------
+
+
+Copyright (c) 2012 Spotify AB
+
+THIS REPOSITORY IS THE PROPERTY OF SPOTIFY AB
+UNAUTHORIZED ACCESS TO THIS DATA IS STRICTLY PROHIBITED.
+
+README Template Version 5
+
+
+Project     : helios
+
+Maintainer  : Drew Csillag <drewc@spotify.com>
+
+Dependencies: -
+
+Environment : Go
+
+Categories  : [x]  Infrastructure
+              [ ]  Database Maintenance
+              [ ]  Shared Library
+              [ ]  Media Data Processing
+              [ ]  Meta Data Processing
+              [x]  Deep Server
+              [ ]  Shallow Server
+              [ ]  Client
+
+
+DESCRIPTION
+------------
+
+
+
+BUILD
+------
+
+go build syslog-redirector
+
+
+INSTALLATION
+-------------
+
+aptitude install syslog-redirector
+
+DEVELOPING
+----------
+
+Prerequisites:
+
+* syslog listening to a port somewhere you can talk to
+
+USING
+-----
+syslog-redirector -h syslog_host:port -n logname -- executable [args...]
+
+Example:
+./syslog-redirector -h 10.0.3.1:6514 -n test-ls-thingy -- ls -l
+
+This would run the command
+  ls -l
+and redirect it's stdout and stderr to TCP syslog running at 
+  10.0.3.1:6514
+and the name that will show up in the syslogs is test-ls-thingy.
+
+Standard out will be logged as LOG_INFO and standard error will be logged as LOG_ERROR.
+

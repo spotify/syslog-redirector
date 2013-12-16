@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+        "flag"
 	"fmt"
 	"log"
 	"log/syslog"
@@ -52,20 +53,43 @@ func NewSysLogger(stream, hostPort, prefix string) (*Syslogger, error) {
 	return &Syslogger{logger, stream, bytes.NewBuffer([]byte{})}, nil
 }
 
+func usage() {
+	fmt.Errorf("usage: %s -h syslog_host:port -n name -- executable [arg ...]\n", os.Args[0])
+	flag.PrintDefaults()
+	os.Exit(1)
+}
+
 func main() {
-	//args are: syslog_host:port name command to run
-	//example ./syslog-redirector 10.0.3.1:6514 test-ls-thingy \
+	flHostPort := flag.String("h", "", "Host port of where to connect to the syslog daemon")
+	flLogName := flag.String("n", "", "Name to log as")
+	flag.Parse()
+
+	if *flHostPort == "" {
+		fmt.Println("Must set the syslog host:port argument");
+		usage()
+	}
+	
+	if *flLogName == "" {
+		fmt.Println("Must set the syslog log name argument");
+		usage()
+	}
+
+	//Example ./syslog-redirector -h 10.0.3.1:6514 -n test-ls-thingy -- \
 	//            /bin/bash -c 'while true; do date; echo $SHELL; sleep 1; done'
 	if len(os.Args) < 4 {
 		fmt.Printf("at least 3 arguments required\n")
-		fmt.Printf("usage: %s syslog_host:port name executable [arg ...]\n", os.Args[0])
-		return
+		usage()
 	}
-	hostPort := os.Args[1]
-	name := os.Args[2]
+	hostPort := *flHostPort
+	name := *flLogName
 
-	cmdArgs := os.Args[4:]
-	cmd := exec.Command(os.Args[3], cmdArgs...)
+	if len(flag.Args()) == 0 {
+		fmt.Printf("must supply a command");
+		usage()
+	}
+
+	cmdArgs := flag.Args()[1:]
+	cmd := exec.Command(flag.Args()[0], cmdArgs...)
 	var err error
 	cmd.Stdout, err = NewSysLogger("stdout", hostPort, name)
 	if err != nil {
