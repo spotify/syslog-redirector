@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+GO=/usr/bin/go
+
+build:
+	dh build --until dh_auto_build
+	$(GO) build syslog-redirector.go
+	# dh_install cannot rename files, so do that here.
+	dh build --remaining
+
+binary:
+	dh binary --until dh_fixperms
+	dh binary --remaining
+
+clean:
+	dh clean
+	$(GO) clean
