@@ -24,7 +24,6 @@ func (s *Syslogger) Write(p []byte) (n int, err error) {
 			s.logger.Print(msg)
 			s.buffer = bytes.NewBuffer([]byte{})
 		}
-
 	}
 	return len(p), nil
 }
@@ -57,7 +56,11 @@ func main() {
 	//args are: syslog_host:port name command to run
 	//example ./syslog-redirector 10.0.3.1:6514 test-ls-thingy \
 	//            /bin/bash -c 'while true; do date; echo $SHELL; sleep 1; done'
-
+	if len(os.Args) < 4 {
+		fmt.Printf("at least 3 arguments required\n")
+		fmt.Printf("usage: %s syslog_host:port name executable [arg ...]\n", os.Args[0])
+		return
+	}
 	hostPort := os.Args[1]
 	name := os.Args[2]
 
