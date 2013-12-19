@@ -9,5 +9,4 @@ Standards-Version: 3.7.2
 
 Package: syslog-redirector
 Architecture: all
-Depends: golang
 Description: Utility to redirect stdout, stderr to syslog
