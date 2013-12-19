@@ -107,6 +107,13 @@ func main() {
 
 	err = cmd.Run()
 	if err != nil {
-		fmt.Errorf("error running command: " + err.Error())
+		if msg, ok := err.(*exec.ExitError); ok {
+			os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
+		} else {
+			fmt.Errorf("error running command: " + err.Error())
+			os.Exit(1)
+		}
 	}
+
+	os.Exit(0)
 }
