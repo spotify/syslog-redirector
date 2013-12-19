@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
-        "flag"
+	"flag"
 	"fmt"
 	"log"
 	"log/syslog"
@@ -65,12 +65,12 @@ func main() {
 	flag.Parse()
 
 	if *flHostPort == "" {
-		fmt.Println("Must set the syslog host:port argument");
+		fmt.Println("Must set the syslog host:port argument")
 		usage()
 	}
-	
+
 	if *flLogName == "" {
-		fmt.Println("Must set the syslog log name argument");
+		fmt.Println("Must set the syslog log name argument")
 		usage()
 	}
 
@@ -84,7 +84,7 @@ func main() {
 	name := *flLogName
 
 	if len(flag.Args()) == 0 {
-		fmt.Printf("must supply a command");
+		fmt.Printf("must supply a command")
 		usage()
 	}
 
