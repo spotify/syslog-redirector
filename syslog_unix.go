@@ -4,7 +4,7 @@
 
 // +build !windows,!plan9
 
-package syslog
+package main
 
 import (
 	"errors"

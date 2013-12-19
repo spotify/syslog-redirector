@@ -7,7 +7,7 @@ GO=/usr/bin/go
 
 build:
 	dh build --until dh_auto_build
-	$(GO) build syslog-redirector.go
+	$(GO) build
 	# dh_install cannot rename files, so do that here.
 	dh build --remaining
 

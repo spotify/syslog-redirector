@@ -4,25 +4,44 @@ import (
 	"bytes"
 	"errors"
 	"flag"
+	//	"log/syslog"
 	"log"
-	"log/syslog"
 	"os"
 	"os/exec"
 	"syscall"
 )
 
 type Syslogger struct {
-	logger *log.Logger
-	stream string
-	buffer *bytes.Buffer
+	//	logger *syslog.Writer
+	logger   *Writer
+	stream   string
+	buffer   *bytes.Buffer
+	hostPort string
+	//	priority syslog.Priority
+	priority Priority
+	prefix   string
+	logFlags int
 }
 
 func (s *Syslogger) Write(p []byte) (n int, err error) {
+	if s.logger == nil {
+		//		sl, err := syslog.Dial("tcp", s.hostPort, s.priority, s.prefix)
+		sl, err := Dial("tcp", s.hostPort, s.priority, s.prefix)
+		if err != nil {
+			// while syslog is down, dump the output
+			return len(p), nil
+		}
+		s.logger = sl
+	}
 	for b := range p {
 		s.buffer.WriteByte(p[b])
 		if p[b] == 10 { // newline
-			msg := string(s.buffer.Bytes())
-			s.logger.Print(msg)
+			n, err := s.logger.Write(s.buffer.Bytes())
+			log.Printf("n is %d\n", n)
+			if err != nil {
+				s.logger = nil
+				log.Printf("error writing, killing syslogger\n")
+			}
 			s.buffer = bytes.NewBuffer([]byte{})
 		}
 	}
@@ -34,23 +53,20 @@ func (s *Syslogger) Close() error {
 }
 
 func NewSysLogger(stream, hostPort, prefix string) (*Syslogger, error) {
-	var priority syslog.Priority
+	//	var priority syslog.Priority
+	var priority Priority
 	if stream == "stderr" {
-		priority = syslog.LOG_ERR | syslog.LOG_LOCAL0
+		priority = LOG_ERR | LOG_LOCAL0
+		//		priority = syslog.LOG_ERR | syslog.LOG_LOCAL0
 	} else if stream == "stdout" {
-		priority = syslog.LOG_INFO | syslog.LOG_LOCAL0
+		priority = LOG_INFO | LOG_LOCAL0
+		//		priority = syslog.LOG_INFO | syslog.LOG_LOCAL0
 	} else {
 		return nil, errors.New("cannot create syslogger for stream " + stream)
 	}
 	logFlags := 0
 
-	s, err := syslog.Dial("tcp", hostPort, priority, prefix)
-	if err != nil {
-		return nil, err
-	}
-
-	logger := log.New(s, "", logFlags)
-	return &Syslogger{logger, stream, bytes.NewBuffer([]byte{})}, nil
+	return &Syslogger{nil, stream, bytes.NewBuffer([]byte{}), hostPort, priority, prefix, logFlags}, nil
 }
 
 func usage() {

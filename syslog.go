@@ -11,7 +11,7 @@
 // Only one call to Dial is necessary. On write failures,
 // the syslog client will attempt to reconnect to the server
 // and write again.
-package syslog
+package main
 
 import (
 	"errors"
@@ -257,10 +257,13 @@ func (w *Writer) write(p Priority, msg string) (int, error) {
 		nl = "\n"
 	}
 
-	timestamp := time.Now().Format(time.RFC3339)
-	fmt.Fprintf(w.conn, "<%d>%s %s %s[%d]: %s%s",
+	timestamp := time.Now().Format(time.RFC3339Nano)
+	_, err := fmt.Fprintf(w.conn, "<%d>%s %s %s[%d]: %s%s",
 		p, timestamp, w.hostname,
 		w.tag, os.Getpid(), msg, nl)
+	if err != nil {
+		return 0, err
+	}
 	return len(msg), nil
 }
 
