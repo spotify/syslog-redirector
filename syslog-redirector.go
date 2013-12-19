@@ -9,6 +9,7 @@ import (
 	"log/syslog"
 	"os"
 	"os/exec"
+	"syscall"
 )
 
 type Syslogger struct {
