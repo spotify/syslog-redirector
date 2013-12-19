@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"flag"
-	"fmt"
 	"log"
 	"log/syslog"
 	"os"
@@ -55,37 +54,39 @@ func NewSysLogger(stream, hostPort, prefix string) (*Syslogger, error) {
 }
 
 func usage() {
-	fmt.Errorf("usage: %s -h syslog_host:port -n name -- executable [arg ...]\n", os.Args[0])
+	log.Printf("usage: %s -h syslog_host:port -n name -- executable [arg ...]", os.Args[0])
 	flag.PrintDefaults()
 	os.Exit(1)
 }
 
 func main() {
+	log.SetFlags(0)
+
 	flHostPort := flag.String("h", "", "Host port of where to connect to the syslog daemon")
 	flLogName := flag.String("n", "", "Name to log as")
 	flag.Parse()
 
 	if *flHostPort == "" {
-		fmt.Println("Must set the syslog host:port argument")
+		log.Printf("Must set the syslog host:port argument")
 		usage()
 	}
 
 	if *flLogName == "" {
-		fmt.Println("Must set the syslog log name argument")
+		log.Printf("Must set the syslog log name argument")
 		usage()
 	}
 
 	//Example ./syslog-redirector -h 10.0.3.1:6514 -n test-ls-thingy -- \
 	//            /bin/bash -c 'while true; do date; echo $SHELL; sleep 1; done'
 	if len(os.Args) < 4 {
-		fmt.Printf("at least 3 arguments required\n")
+		log.Printf("at least 3 arguments required")
 		usage()
 	}
 	hostPort := *flHostPort
 	name := *flLogName
 
 	if len(flag.Args()) == 0 {
-		fmt.Printf("must supply a command")
+		log.Printf("must supply a command")
 		usage()
 	}
 
@@ -106,12 +107,12 @@ func main() {
 
 	cmd.Stdout, err = NewSysLogger("stdout", hostPort, name)
 	if err != nil {
-		fmt.Errorf("error creating syslog writer for stdout: " + err.Error())
+		log.Printf("error creating syslog writer for stdout: %v", err)
 	}
 
 	cmd.Stderr, err = NewSysLogger("stderr", hostPort, name)
 	if err != nil {
-		fmt.Errorf("error creating syslog writer for stderr: " + err.Error())
+		log.Printf("error creating syslog writer for stderr: %v", err)
 	}
 
 	err = cmd.Run()
@@ -119,7 +120,7 @@ func main() {
 		if msg, ok := err.(*exec.ExitError); ok {
 			os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
 		} else {
-			fmt.Errorf("error running command: " + err.Error())
+			log.Printf("error running command: %v", err)
 			os.Exit(1)
 		}
 	}
