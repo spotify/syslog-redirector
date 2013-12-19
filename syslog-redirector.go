@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"flag"
-	//	"log/syslog"
 	"log"
 	"os"
 	"os/exec"
@@ -12,21 +11,19 @@ import (
 )
 
 type Syslogger struct {
-	//	logger *syslog.Writer
 	logger   *Writer
 	stream   string
 	buffer   *bytes.Buffer
 	hostPort string
-	//	priority syslog.Priority
 	priority Priority
 	prefix   string
 	logFlags int
+        protocol string
 }
 
 func (s *Syslogger) Write(p []byte) (n int, err error) {
 	if s.logger == nil {
-		//		sl, err := syslog.Dial("tcp", s.hostPort, s.priority, s.prefix)
-		sl, err := Dial("tcp", s.hostPort, s.priority, s.prefix)
+		sl, err := Dial(s.protocol, s.hostPort, s.priority, s.prefix)
 		if err != nil {
 			// while syslog is down, dump the output
 			return len(p), nil
@@ -36,11 +33,9 @@ func (s *Syslogger) Write(p []byte) (n int, err error) {
 	for b := range p {
 		s.buffer.WriteByte(p[b])
 		if p[b] == 10 { // newline
-			n, err := s.logger.Write(s.buffer.Bytes())
-			log.Printf("n is %d\n", n)
+			_, err := s.logger.Write(s.buffer.Bytes())
 			if err != nil {
 				s.logger = nil
-				log.Printf("error writing, killing syslogger\n")
 			}
 			s.buffer = bytes.NewBuffer([]byte{})
 		}
@@ -52,21 +47,18 @@ func (s *Syslogger) Close() error {
 	return nil
 }
 
-func NewSysLogger(stream, hostPort, prefix string) (*Syslogger, error) {
-	//	var priority syslog.Priority
+func NewSysLogger(stream, hostPort, prefix, protocol string) (*Syslogger, error) {
 	var priority Priority
 	if stream == "stderr" {
 		priority = LOG_ERR | LOG_LOCAL0
-		//		priority = syslog.LOG_ERR | syslog.LOG_LOCAL0
 	} else if stream == "stdout" {
 		priority = LOG_INFO | LOG_LOCAL0
-		//		priority = syslog.LOG_INFO | syslog.LOG_LOCAL0
 	} else {
 		return nil, errors.New("cannot create syslogger for stream " + stream)
 	}
 	logFlags := 0
 
-	return &Syslogger{nil, stream, bytes.NewBuffer([]byte{}), hostPort, priority, prefix, logFlags}, nil
+	return &Syslogger{nil, stream, bytes.NewBuffer([]byte{}), hostPort, priority, prefix, logFlags, protocol}, nil
 }
 
 func usage() {
@@ -80,6 +72,7 @@ func main() {
 
 	flHostPort := flag.String("h", "", "Host port of where to connect to the syslog daemon")
 	flLogName := flag.String("n", "", "Name to log as")
+	flProtocol := flag.Bool("t", false, "use TCP instead of UDP (the default) for syslog communication")
 	flag.Parse()
 
 	if *flHostPort == "" {
@@ -90,6 +83,11 @@ func main() {
 	if *flLogName == "" {
 		log.Printf("Must set the syslog log name argument")
 		usage()
+	}
+
+	protocol := "udp"
+	if *flProtocol {
+		protocol = "tcp"
 	}
 
 	//Example ./syslog-redirector -h 10.0.3.1:6514 -n test-ls-thingy -- \
@@ -121,12 +119,12 @@ func main() {
 
 	// TODO (dano): tolerate syslog downtime by reconnecting
 
-	cmd.Stdout, err = NewSysLogger("stdout", hostPort, name)
+	cmd.Stdout, err = NewSysLogger("stdout", hostPort, name, protocol)
 	if err != nil {
 		log.Printf("error creating syslog writer for stdout: %v", err)
 	}
 
-	cmd.Stderr, err = NewSysLogger("stderr", hostPort, name)
+	cmd.Stderr, err = NewSysLogger("stderr", hostPort, name, protocol)
 	if err != nil {
 		log.Printf("error creating syslog writer for stderr: %v", err)
 	}
