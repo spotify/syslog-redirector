@@ -90,12 +90,21 @@ func main() {
 
 	cmdArgs := flag.Args()[1:]
 	cmd := exec.Command(flag.Args()[0], cmdArgs...)
+
 	var err error
+
+	// TODO (dano): tolerate syslog downtime by reconnecting
+
 	cmd.Stdout, err = NewSysLogger("stdout", hostPort, name)
 	if err != nil {
-		fmt.Errorf("error creating syslog writer: " + err.Error())
+		fmt.Errorf("error creating syslog writer for stdout: " + err.Error())
 	}
+
 	cmd.Stderr, err = NewSysLogger("stderr", hostPort, name)
+	if err != nil {
+		fmt.Errorf("error creating syslog writer for stderr: " + err.Error())
+	}
+
 	err = cmd.Run()
 	if err != nil {
 		fmt.Errorf("error running command: " + err.Error())
