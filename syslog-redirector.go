@@ -89,10 +89,18 @@ func main() {
 		usage()
 	}
 
+	cmdName := flag.Args()[0]
 	cmdArgs := flag.Args()[1:]
-	cmd := exec.Command(flag.Args()[0], cmdArgs...)
 
 	var err error
+
+	path, err := exec.LookPath(cmdName)
+	if err != nil {
+		log.Printf("Unable to locate %v", cmdName)
+		os.Exit(127)
+	}
+
+	cmd := exec.Command(path, cmdArgs...)
 
 	// TODO (dano): tolerate syslog downtime by reconnecting
 
