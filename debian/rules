@@ -17,4 +17,3 @@ binary:
 
 clean:
 	dh clean
-	rm syslog-redirector
