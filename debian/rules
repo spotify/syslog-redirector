@@ -7,7 +7,7 @@ GO=/usr/bin/gccgo
 
 build:
 	dh build --until dh_auto_build
-	$(GO) -static -o syslog-redirector build syslog-redirector.go syslog.go syslog_unix.go
+	$(GO) -static -o syslog-redirector syslog-redirector.go syslog.go syslog_unix.go
 	# dh_install cannot rename files, so do that here.
 	dh build --remaining
 
