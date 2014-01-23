@@ -17,4 +17,4 @@ binary:
 
 clean:
 	dh clean
-	$(GO) clean
+	rm syslog-redirector
