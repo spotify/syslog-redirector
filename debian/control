@@ -5,6 +5,7 @@ Maintainer: Drew Csillag <drewc@spotify.com>
 Build-Depends:
   debhelper (>= 7),
   golang,
+  gccgo,
 Standards-Version: 3.7.2
 
 Package: syslog-redirector
