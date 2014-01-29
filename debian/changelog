@@ -1,3 +1,9 @@
+syslog-redirector (0.0.2) unstable; urgency=low
+
+  * now really statically linked
+
+ -- Drew Csillag <drewc@spotify.com>  Wed, 29 Jan 2014 13:22:34 +0000
+
 syslog-redirector (0.0.1) unstable; urgency=low
 
   * Initial release.
