@@ -9,7 +9,7 @@ build:
 #	git submodule init
 #	git submodule update
 	dh build --until dh_auto_build
-	GOROOT=$(CURDIR)/go CGO_ENABLED=0 $(GO) build
+	GOROOT=$(CURDIR)/go CGO_ENABLED=0 $(GO) build syslog-redirector.go syslog_unix.go syslog.go
 	dh build --remaining
 
 binary:
