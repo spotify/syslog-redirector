@@ -1,0 +1,3 @@
+[submodule "go"]
+	path = go
+	url = git@ghe.spotify.net:nycsi/golang-amd64.git
