@@ -1,5 +1,5 @@
 //  Copyright (c) 2014 Spotify AB.
-// 
+//
 //  Licensed to the Apache Software Foundation (ASF) under one
 //  or more contributor license agreements.  See the NOTICE file
 //  distributed with this work for additional information
@@ -7,9 +7,9 @@
 //  to you under the Apache License, Version 2.0 (the
 //  "License"); you may not use this file except in compliance
 //  with the License.  You may obtain a copy of the License at
-// 
+//
 //    http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 //  Unless required by applicable law or agreed to in writing,
 //  software distributed under the License is distributed on an
 //  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"syscall"
 )
 
@@ -37,7 +38,7 @@ type Syslogger struct {
 	priority Priority
 	prefix   string
 	logFlags int
-        protocol string
+	protocol string
 }
 
 func (s *Syslogger) Write(p []byte) (n int, err error) {
@@ -84,6 +85,31 @@ func usage() {
 	log.Printf("usage: %s -h syslog_host:port -n name -- executable [arg ...]", os.Args[0])
 	flag.PrintDefaults()
 	os.Exit(1)
+}
+
+func setupSignalHandlers(pid *exec.Cmd) {
+
+	sigc := make(chan os.Signal, 1)
+
+	sigarray := make([]os.Signal, 30)
+	for i := 0; i < 30; i++ {
+		sigarray[i] = syscall.Signal(i + 1)
+	}
+
+	signal.Notify(sigc, sigarray...)
+
+	go func() {
+		for {
+			if pid.ProcessState != nil {
+				break
+			}
+			s := <-sigc
+			var ss syscall.Signal
+			ss = s.(syscall.Signal)
+			syscall.Kill(pid.Process.Pid, ss)
+		}
+	}()
+
 }
 
 func main() {
@@ -148,7 +174,8 @@ func main() {
 		log.Printf("error creating syslog writer for stderr: %v", err)
 	}
 
-	err = cmd.Run()
+	err = cmd.Start()
+
 	if err != nil {
 		if msg, ok := err.(*exec.ExitError); ok {
 			os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
@@ -157,6 +184,9 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
+	setupSignalHandlers(cmd)
+	err = cmd.Wait()
 
 	os.Exit(0)
 }
