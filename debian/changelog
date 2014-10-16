@@ -1,3 +1,9 @@
+syslog-redirector (0.0.4) unstable; urgency=low
+
+  * Forward signals to child process
+
+ -- Drew Csillag <drewc@spotify.com>  Thu, 16 Oct 2014 13:22:34 +0000
+
 syslog-redirector (0.0.3) unstable; urgency=low
 
   * Now include go submodule so in theory this might work
