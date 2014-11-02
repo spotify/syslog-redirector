@@ -54,6 +54,7 @@ usage: ./syslog-redirector -h syslog_host:port -n name -- executable [arg ...]
   -h="": Host port of where to connect to the syslog daemon
   -n="": Name to log as
   -t=false: use TCP instead of UDP (the default) for syslog communication
+  -tee=false: also write to stdout and stderr
 ```
 
 Example:
