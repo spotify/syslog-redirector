@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"errors"
 	"flag"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -118,6 +119,7 @@ func main() {
 	flHostPort := flag.String("h", "", "Host port of where to connect to the syslog daemon")
 	flLogName := flag.String("n", "", "Name to log as")
 	flProtocol := flag.Bool("t", false, "use TCP instead of UDP (the default) for syslog communication")
+	flTee := flag.Bool("tee", false, "also write to stdout and stderr")
 	flag.Parse()
 
 	if *flHostPort == "" {
@@ -172,6 +174,11 @@ func main() {
 	cmd.Stderr, err = NewSysLogger("stderr", hostPort, name, protocol)
 	if err != nil {
 		log.Printf("error creating syslog writer for stderr: %v", err)
+	}
+
+	if *flTee {
+		cmd.Stdout = io.MultiWriter(os.Stdout, cmd.Stdout)
+		cmd.Stderr = io.MultiWriter(os.Stderr, cmd.Stderr)
 	}
 
 	err = cmd.Start()
