@@ -51,6 +51,11 @@ func (s *Syslogger) Write(p []byte) (n int, err error) {
 		}
 		s.logger = sl
 	}
+
+	if s.logger == nil { // shouldn't happen
+		return len(p), nil // dump output
+	}
+
 	for b := range p {
 		s.buffer.WriteByte(p[b])
 		if p[b] == 10 { // newline
