@@ -1,3 +1,10 @@
+syslog-redirector (0.0.6) unstable; urgency=low
+
+  * Move build system to docker
+  * fix for crash for things being nil that should not be.
+
+ -- Drew Csillag <drewc@spotify.com>  Thu, 17 Nov 2014 13:22:34 +0000
+
 syslog-redirector (0.0.5) unstable; urgency=low
 
   * Just a version number bump since internal verison # and external were off

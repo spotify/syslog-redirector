@@ -160,6 +160,9 @@ func (w *Writer) connect() (err error) {
 
 // Write sends a log message to the syslog daemon.
 func (w *Writer) Write(b []byte) (int, error) {
+	if w == nil || b == nil {
+		return 0, nil
+	}
 	return w.writeAndRetry(w.priority, string(b))
 }
 
