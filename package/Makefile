@@ -1,8 +1,10 @@
 .PHONY: package clean
 
+VERSION=$(shell git describe --tags --dirty)
+
 all: package
 
 package:
-	docker build -t spotify/syslog-redirector:0.0.5 .
+	docker build -t spotify/syslog-redirector:$(VERSION) .
 
 clean:
