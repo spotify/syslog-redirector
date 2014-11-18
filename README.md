@@ -11,10 +11,10 @@ there are others.
 
 # Build
 
+Note: Requires docker.
+
 ```shell
-git submodule init
-git submodule update
-GOROOT=$PWD/go CGO_ENABLED=0 ./go/bin/go build syslog-redirector.go syslog_unix.go syslog.go
+make
 ```
 
 # Installation

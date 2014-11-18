@@ -1,3 +1,0 @@
-[submodule "go"]
-	path = go
-	url = https://github.com/spotify/syslog-redirector-golang.git
