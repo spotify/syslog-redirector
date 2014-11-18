@@ -7,4 +7,7 @@ all: package
 package:
 	docker build -t spotify/syslog-redirector:$(VERSION) .
 
+push:
+	docker push spotify/syslog-redirector:$(VERSION)
+
 clean:

@@ -15,3 +15,6 @@ clean:
 	rm -f syslog-redirector
 	make -C build clean
 	make -C package clean
+
+push:
+	make -C package push
