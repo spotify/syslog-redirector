@@ -8,5 +8,5 @@ export DH_VERBOSE=1
 GO=$(CURDIR)/go/bin/go
 
 override_dh_auto_build:
-	GOROOT=$(CURDIR)/go CGO_ENABLED=0 $(GO) build syslog-redirector.go syslog_unix.go syslog.go
+	make
 	dh_auto_build
