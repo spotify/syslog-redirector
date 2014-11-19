@@ -2,7 +2,7 @@ Source: syslog-redirector
 Section: non-free/net
 Priority: extra
 Maintainer: Drew Csillag <drewc@spotify.com>
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7), lxc-docker
 Standards-Version: 3.7.2
 
 Package: syslog-redirector
