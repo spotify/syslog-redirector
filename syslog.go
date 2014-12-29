@@ -34,6 +34,11 @@ type Priority int
 const severityMask = 0x07
 const facilityMask = 0xf8
 
+// According to RFC5424 maximum digits allowed in TIME-SECFRAC is **6**.
+// Example 5 on http://tools.ietf.org/html/rfc5424#section-6.2.3.1 also
+// points out, that using nanosecond accuracy produces an invalid timestamp
+const RFC3339Micro = "2006-01-02T15:04:05.999999Z07:00"
+
 const (
 	// Severity.
 
@@ -261,7 +266,7 @@ func (w *Writer) write(p Priority, msg string) (int, error) {
 		nl = "\n"
 	}
 
-	timestamp := time.Now().Format(time.RFC3339Nano)
+	timestamp := time.Now().Format(RFC3339Micro)
 	_, err := fmt.Fprintf(w.conn, "<%d>%s %s %s[%d]: %s%s",
 		p, timestamp, w.hostname,
 		w.tag, os.Getpid(), msg, nl)
