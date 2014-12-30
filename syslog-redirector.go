@@ -200,5 +200,19 @@ func main() {
 	setupSignalHandlers(cmd)
 	err = cmd.Wait()
 
+	if err != nil {
+		// on Linux and Windows get the exit code (ExitStatus())
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				os.Exit(status.ExitStatus())
+			}
+		}
+
+		// there was an error, but we don't know how to get
+		// exit code on this platform at the moment, let's
+		// return a generic error 1
+		os.Exit(1)
+	}
+
 	os.Exit(0)
 }
