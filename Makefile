@@ -18,3 +18,6 @@ clean:
 
 push:
 	make -C package push
+
+rpm: build
+	rpmbuild -bb --buildroot=`pwd`/_rpmbuild/ syslog-redirector.spec
